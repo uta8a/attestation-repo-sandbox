@@ -1,0 +1,32 @@
+name: Artifact Attestations Test
+
+# ref. https://developer.mamezou-tech.com/blogs/2024/06/03/github-artifact-attenstations/
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  Build:
+    permissions:
+      id-token: write
+      contents: read
+      attestations: write
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Build artifact
+      run: |
+        mkdir -p _artifacts
+        echo "Hello! now is $(date)" >> _artifacts/hello.txt
+        tar -czf hello.tar.gz _artifacts
+    - name: Generate artifact attestation
+      uses: actions/attest-build-provenance@v1
+      with:
+        subject-path: 'hello.tar.gz'
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: hello
+        path: hello.tar.gz
